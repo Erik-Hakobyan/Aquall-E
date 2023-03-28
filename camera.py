@@ -1,5 +1,6 @@
 import cv2
 
+
 # Open a connection to the webcam
 cap = cv2.VideoCapture(0)
 
