@@ -1,8 +1,9 @@
 import PyESCControl as esc
 import tkinter as tk
 
-# Initialize the ESC with the correct channel numbers
-esc.initialize(1, 2)
+# Initialize the ESCs with the correct channel numbers
+esc1 = esc.PyESCControl(1)
+esc2 = esc.PyESCControl(2)
 
 # Create a tkinter window and set its properties
 window = tk.Tk()
@@ -22,12 +23,12 @@ speed1_slider.pack()
 speed2_slider.pack()
 
 # Create six buttons to control the direction of each thruster
-forward1_button = tk.Button(window, text="Thruster 1 Forward", command=lambda: esc.setSpeed(1, speed1_slider.get()/100))
-backward1_button = tk.Button(window, text="Thruster 1 Backward", command=lambda: esc.setSpeed(1, -speed1_slider.get()/100))
-stop1_button = tk.Button(window, text="Thruster 1 Stop", command=lambda: esc.setSpeed(1, 0))
-forward2_button = tk.Button(window, text="Thruster 2 Forward", command=lambda: esc.setSpeed(2, speed2_slider.get()/100))
-backward2_button = tk.Button(window, text="Thruster 2 Backward", command=lambda: esc.setSpeed(2, -speed2_slider.get()/100))
-stop2_button = tk.Button(window, text="Thruster 2 Stop", command=lambda: esc.setSpeed(2, 0))
+forward1_button = tk.Button(window, text="Thruster 1 Forward", command=lambda: esc1.setSpeed(speed1_slider.get()/100))
+backward1_button = tk.Button(window, text="Thruster 1 Backward", command=lambda: esc1.setSpeed(-speed1_slider.get()/100))
+stop1_button = tk.Button(window, text="Thruster 1 Stop", command=lambda: esc1.setSpeed(0))
+forward2_button = tk.Button(window, text="Thruster 2 Forward", command=lambda: esc2.setSpeed(speed2_slider.get()/100))
+backward2_button = tk.Button(window, text="Thruster 2 Backward", command=lambda: esc2.setSpeed(-speed2_slider.get()/100))
+stop2_button = tk.Button(window, text="Thruster 2 Stop", command=lambda: esc2.setSpeed(0))
 forward1_button.pack()
 backward1_button.pack()
 stop1_button.pack()
