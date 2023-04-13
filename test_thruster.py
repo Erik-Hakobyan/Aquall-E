@@ -1,43 +1,31 @@
-import RPi.GPIO as GPIO
 import time
-import tkinter as tk
-
-# Initialize the GPIO pins
+import RPi.GPIO as GPIO
+GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)
-GPIO.setup(11, GPIO.OUT)
-GPIO.setup(13, GPIO.OUT)
 
-# Initialize the PWM signals
-esc1_pwm = GPIO.PWM(11, 50)
-esc2_pwm = GPIO.PWM(13, 50)
-esc1_pwm.start(0)
-esc2_pwm.start(0)
+GPIO.setup(7, GPIO.OUT)
 
-# Create a function to set the speed of a thruster
-def set_speed(esc_pwm, duty_cycle):
-    esc_pwm.ChangeDutyCycle(duty_cycle)
+t1 = GPIO.PWM(7, 50)
 
-# Create a tkinter window and set its properties
-window = tk.Tk()
-window.title("T200 Thruster Control")
-window.geometry("400x300")
+t1.start(0)
 
-# Create six buttons to control the direction of each thruster
-forward1_button = tk.Button(window, text="Thruster 1 Forward", command=lambda: set_speed(esc1_pwm, 1900))
-backward1_button = tk.Button(window, text="Thruster 1 Backward", command=lambda: set_speed(esc1_pwm, 1100))
-stop1_button = tk.Button(window, text="Thruster 1 Stop", command=lambda: set_speed(esc1_pwm, 1500))
-forward2_button = tk.Button(window, text="Thruster 2 Forward", command=lambda: set_speed(esc2_pwm, 1900))
-backward2_button = tk.Button(window, text="Thruster 2 Backward", command=lambda: set_speed(esc2_pwm, 1100))
-stop2_button = tk.Button(window, text="Thruster 2 Stop", command=lambda: set_speed(esc2_pwm, 1500))
-forward1_button.pack()
-backward1_button.pack()
-stop1_button.pack()
-forward2_button.pack()
-backward2_button.pack()
-stop2_button.pack()
 
-# Start the tkinter event loop
-window.mainloop()
+t1.ChangeDutyCycle(7.5)
+time.sleep(3)
 
-# Clean up the GPIO pins
-GPIO.cleanup()
+try:
+    while True:
+        t1.ChangeDutyCycle(9.5)
+        time.sleep(3)
+        t1.ChangeDutyCycle(5.5)
+        time.sleep(3)
+        t1.ChangeDutyCycle(7.5)
+        time.sleep(3)
+
+except KeyboardInterrupt:
+    print("User Cancelled")
+
+finally:
+    t1.stop()
+    GPIO.cleanup()
+    quit()
