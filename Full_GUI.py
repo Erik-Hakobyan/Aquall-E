@@ -1,6 +1,10 @@
-import RPi.GPIO as GPIO
-from time import sleep
+import os
 import tkinter as tk
+import RPi.GPIO as GPIO          
+import time 
+os.system ("sudo pigpiod")
+time.sleep(1)
+import pigpio
 import subprocess
 
 in1 = 24
@@ -17,80 +21,152 @@ GPIO.output(in2,GPIO.LOW)
 p=GPIO.PWM(en,1000)
 p.start(25)
 
-def forward():
+ESC1 = 12
+ESC2 = 13
+
+pi = pigpio.pi()
+pi.set_servo_pulsewidth(ESC1, 1500)
+pi.set_servo_pulsewidth(ESC2, 1500)
+
+max_value = 1700
+min_value = 1300
+base_value = 1500
+
+def forward_motor():
     global temp1
     GPIO.output(in1,GPIO.HIGH)
     GPIO.output(in2,GPIO.LOW)
-    temp1 = 1
+    temp1=1
+    print("forward motor")
 
-def backward():
+def backward_motor():
     global temp1
     GPIO.output(in1,GPIO.LOW)
     GPIO.output(in2,GPIO.HIGH)
-    temp1 = 0
+    temp1=0
+    print("backward motor")
 
-def stop():
+def low_motor():
+    p.ChangeDutyCycle(25)
+    print("low")
+
+def medium_motor():
+    p.ChangeDutyCycle(50)
+    print("medium")
+
+def high_motor():
+    p.ChangeDutyCycle(75)
+    print("high")
+
+def stop_motor():
     GPIO.output(in1,GPIO.LOW)
     GPIO.output(in2,GPIO.LOW)
+    print("stop")
 
-def set_speed(slider_value):
-    p.ChangeDutyCycle(slider_value)
+def exit_motor():
+    GPIO.cleanup()
+    root.destroy()
 
 def start_sensors():
-    subprocess.Popen(["python", "sensor1.py"])
-    subprocess.Popen(["python", "sensor2.py"])
-    subprocess.Popen(["python", "sensor3.py"])
+    subprocess.Popen(["python", "Thermo.py"])
+    subprocess.Popen(["python", "Ultrasonic.py"])
+    subprocess.Popen(["python", "Battery_Sensor.py"])
+
 
 def start_camera():
     subprocess.Popen(["python", "camera.py"])
 
+def forward_thruster():
+    speed1 = max_value
+    speed2 = max_value
+    pi.set_servo_pulsewidth(ESC1, speed1)
+    pi.set_servo_pulsewidth(ESC2, speed2)
+    
+def backward_thruster():
+    speed1 = min_value
+    speed2 = min_value
+    pi.set_servo_pulsewidth(ESC1, speed1)
+    pi.set_servo_pulsewidth(ESC2, speed2)
+    
+def left_thruster():
+    speed1 = max_value
+    speed2 = 1550
+    pi.set_servo_pulsewidth(ESC1, speed2)
+    pi.set_servo_pulsewidth(ESC2, speed1)
+
+def right_thruster():
+    speed1 = max_value
+    speed2 = 1550
+    pi.set_servo_pulsewidth(ESC1, speed1)
+    pi.set_servo_pulsewidth(ESC2, speed2)
+    
+def pause_thruster():
+    speed1 = base_value
+    speed2 = base_value
+    pi.set_servo_pulsewidth(ESC1, speed1)
+    pi.set_servo_pulsewidth(ESC2, speed2)
+    
+def stop_thruster():
+    pi.set_servo_pulsewidth(ESC1, 1500)
+    pi.set_servo_pulsewidth(ESC2, 1500)
+    pi.stop()
+    os.system ("sudo killall pigpiod")
+    root.destroy()
+
 root = tk.Tk()
-root.title("Thruster, Motor, Sensor and Camera GUI")
-
-thruster_frame = tk.Frame(root)
-thruster_frame.pack(side="left", fill="both", expand=True)
-
-motor_frame = tk.Frame(root)
-motor_frame.pack(side="left", fill="both", expand=True)
+root.title("Sensor and Camera GUI")
+root.protocol("WM_DELETE_WINDOW", stop_thruster)
+root.geometry("800x800")
 
 sensor_frame = tk.Frame(root)
-sensor_frame.pack(side="right", fill="both", expand=True)
+sensor_frame.pack(side="left", fill="both", expand=True)
 
 camera_frame = tk.Frame(root)
 camera_frame.pack(side="right", fill="both", expand=True)
 
-# Thruster GUI
-thruster_label = tk.Label(thruster_frame, text="Thruster Control", font=("Arial", 14))
-thruster_label.pack(side="top", pady=20)
-
-thruster_forward_button = tk.Button(thruster_frame, text="Forward", command=forward)
-thruster_forward_button.pack(side="top", pady=10)
-
-thruster_backward_button = tk.Button(thruster_frame, text="Backward", command=backward)
-thruster_backward_button.pack(side="top", pady=10)
-
-thruster_stop_button = tk.Button(thruster_frame, text="Stop", command=stop)
-thruster_stop_button.pack(side="top", pady=10)
-
-# Motor GUI
-motor_label = tk.Label(motor_frame, text="Motor Control", font=("Arial", 14))
-motor_label.pack(side="top", pady=20)
-motor_slider = tk.Scale(motor_frame, 0, to=100, orient="horizontal", command=set_speed)
-motor_slider.pack(side="top", pady=10)
-
-# Sensor and Camera GUI
-sensor_label = tk.Label(sensor_frame, text="Sensor Control", font=("Arial", 14))
-sensor_label.pack(side="top", pady=20)
-
 sensor_button = tk.Button(sensor_frame, text="Start Sensors", command=start_sensors)
-sensor_button.pack(side="top", pady=10)
-
-camera_label = tk.Label(camera_frame, text="Camera Control", font=("Arial", 14))
-camera_label.pack(side="top", pady=20)
+sensor_button.pack()
 
 camera_button = tk.Button(camera_frame, text="Start Camera", command=start_camera)
-camera_button.pack(side="top", pady=10)
+camera_button.pack()
+
+forward_button = tk.Button(root, text="Forward Motor", command=forward_motor)
+forward_button.pack(pady=10)
+
+backward_button = tk.Button(root, text="Backward Motor", command=backward_motor)
+backward_button.pack(pady=10)
+
+low_button = tk.Button(root, text="Low Motor", command=low_motor)
+low_button.pack(pady=10)
+
+medium_button = tk.Button(root, text="Medium Motor", command=medium_motor)
+medium_button.pack(pady=10)
+
+high_button = tk.Button(root, text="High Motor", command=high_motor)
+high_button.pack(pady=10)
+
+stop_button = tk.Button(root, text="Stop Motor", command=stop_motor)
+stop_button.pack(pady=10)
+
+exit_button = tk.Button(root, text="Exit Motor", command=exit_motor)
+exit_button.pack(pady=10)
+
+forward_button = tk.Button(root, text="Forward ", command=forward_thruster)
+forward_button.pack()
+
+backward_button = tk.Button(root, text="Backward Thruster", command=backward_thruster)
+backward_button.pack()
+
+left_button = tk.Button(root, text="Move Left", command=left_thruster)
+left_button.pack()
+
+right_button = tk.Button(root, text="Move Right", command=right_thruster)
+right_button.pack()
+
+stop_button = tk.Button(root, text="Stop Thruster", command=stop_thruster)
+stop_button.pack()
+
+pause_button = tk.Button(root, text="Pause Thruster", command=pause_thruster)
+pause_button.pack()
 
 root.mainloop()
-
-GPIO.cleanup()
