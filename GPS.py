@@ -10,7 +10,7 @@ def haversine(lat1, lon1, lat2, lon2):
     lat2_rad, lon2_rad = math.radians(lat2), math.radians(lon2)
     dlat, dlon = lat2_rad - lat1_rad, lon2_rad - lon1_rad
     a = math.sin(dlat / 2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon / 2)**2
-    return 2 * R * math.asin(math.sqrt(a))
+    return 2 * R * math.asin(math.sqrt(a)) * 3280.84  # Convert to feet
 
 # Initialize USB connection
 device_path = "/dev/ttyUSB0"  # Replace this with the device path you found
@@ -41,10 +41,10 @@ while True:
 
     last_lat, last_lon = gps.latitude, gps.longitude
     speed_knots = gps.speed_knots if gps.speed_knots is not None else 0
-    speed_kph = speed_knots * 1.852
+    speed_fps = speed_knots * 1.68781  # Convert to feet per second
 
     print(f"Latitude: {gps.latitude:.6f}, Longitude: {gps.longitude:.6f}")
-    print(f"Speed: {speed_kph:.2f} km/h")
-    print(f"Distance traveled: {total_distance:.3f} km")
+    print(f"Speed: {speed_fps:.2f} ft/s")
+    print(f"Distance traveled: {total_distance:.2f} ft")
 
     time.sleep(1)
