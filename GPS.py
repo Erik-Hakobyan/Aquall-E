@@ -1,19 +1,7 @@
 import time
-import board
-import busio
-import adafruit_gps
 import math
-
-# Initialize UART connection
-uart = busio.UART(board.TX, board.RX, baudrate=9600)
-gps = adafruit_gps.GPS(uart, debug=False)
-
-# Configure GPS module
-gps.send_command(b"PMTK220,100")  # Set update rate to 100ms
-gps.send_command(b"PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0")  # Enable only GPRMC and GPGGA
-gps.send_command(b"PMTK301,2")  # Set to SBAS mode
-gps.send_command(b"PMTK313,1")  # Enable SBAS
-gps.send_command(b"PMTK397,0")  # Set Nav Speed Threshold to 0
+import serial
+import adafruit_gps
 
 # Helper function to calculate distance between two coordinates
 def haversine(lat1, lon1, lat2, lon2):
@@ -23,6 +11,18 @@ def haversine(lat1, lon1, lat2, lon2):
     dlat, dlon = lat2_rad - lat1_rad, lon2_rad - lon1_rad
     a = math.sin(dlat / 2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon / 2)**2
     return 2 * R * math.asin(math.sqrt(a))
+
+# Initialize USB connection
+device_path = "/dev/ttyUSB0"  # Replace this with the device path you found
+ser = serial.Serial(device_path, 9600, timeout=1)
+gps = adafruit_gps.GPS(ser, debug=False)
+
+# Configure GPS module
+gps.send_command(b"PMTK220,100")  # Set update rate to 100ms
+gps.send_command(b"PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0")  # Enable only GPRMC and GPGGA
+gps.send_command(b"PMTK301,2")  # Set to SBAS mode
+gps.send_command(b"PMTK313,1")  # Enable SBAS
+gps.send_command(b"PMTK397,0")  # Set Nav Speed Threshold to 0
 
 # Initialize variables
 last_lat, last_lon = None, None
